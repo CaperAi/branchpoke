@@ -1,0 +1,76 @@
+load("@pip//:requirements.bzl", "requirement")
+load("@io_bazel_rules_docker//python3:image.bzl", "py3_image")
+
+py_library(
+    name = "vcs",
+    srcs = [
+        "version_control.py",
+    ],
+    srcs_version = "PY3",
+    deps = [
+        ":config",
+    ],
+)
+
+py_library(
+    name = "ms",
+    srcs = [
+        "messaging.py",
+    ],
+    srcs_version = "PY3",
+    deps = [
+        ":config",
+    ],
+)
+
+py_library(
+    name = "config",
+    srcs = [
+        "config.py",
+    ],
+    srcs_version = "PY3",
+)
+
+py_library(
+    name = "gitlab",
+    srcs = [
+        "gl.py",
+    ],
+    srcs_version = "PY3",
+    deps = [
+        ":config",
+        ":vcs",
+        requirement("python-gitlab"),
+    ],
+)
+
+py_library(
+    name = "slack",
+    srcs = [
+        "sl.py",
+    ],
+    srcs_version = "PY3",
+    deps = [
+        ":config",
+        ":ms",
+        requirement("slackclient"),
+        requirement("aiohttp"),
+    ],
+)
+
+py3_image(
+    name = "branchpoke",
+    srcs = [
+        "main.py",
+        "poke.py",
+    ],
+    main = "main.py",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":config",
+        ":gitlab",
+        ":ms",
+        ":slack",
+        ":vcs",
+    ],
+)
